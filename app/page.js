@@ -1,69 +1,230 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import ProductCard from "@/components/ProductCard";
+import ProductSkeleton from "@/components/ProductSkeleton";
+import Footer from "@/components/Footer";
+
+import {
+  API_BASE,
+  toBanglaNumber,
+} from "@/lib/helpers";
 
 export default function Home() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function getProducts() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `${API_BASE}/products`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load products"
+          );
+        }
+
+        const data = await response.json();
+
+        const productList = Array.isArray(data)
+          ? data
+          : data.products ||
+            data.data ||
+            [];
+
+        setProducts(productList);
+      } catch (error) {
+        setError(
+          "পণ্যের তথ্য লোড করা যায়নি।"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getProducts();
+  }, []);
+
+  const getChange = (product) => {
+    return Number(
+      product.change?.pct || 0
+    );
+  };
+
+  const priceRisers = useMemo(() => {
+    return [...products]
+      .filter(
+        (product) =>
+          product.change?.dir === "up"
+      )
+      .sort(
+        (a, b) =>
+          getChange(b) - getChange(a)
+      )
+      .slice(0, 6);
+  }, [products]);
+
+  const priceFallers = useMemo(() => {
+    return [...products]
+      .filter(
+        (product) =>
+          product.change?.dir === "down"
+      )
+      .sort(
+        (a, b) =>
+          getChange(a) - getChange(b)
+      )
+      .slice(0, 6);
+  }, [products]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Navbar />
+
+      <main>
+        <Hero />
+
+        {/* PRICE RISERS */}
+        <section className="mx-auto max-w-[1152px] px-4 pt-14 sm:px-5 lg:px-4">
+          <div className="mb-5 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-[#1d271f]">
+              আজ দাম বেড়েছে
+            </h2>
+
+            <span className="text-lg font-bold text-[#05893e]">
+              ▲
+            </span>
+          </div>
+
+          {loading ? (
+            <ProductSkeletonGrid />
+          ) : priceRisers.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {priceRisers.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-[#667069]">
+              আজ দাম বেড়েছে এমন কোনো পণ্য নেই।
+            </p>
+          )}
+        </section>
+
+        {/* PRICE FALLERS */}
+        <section className="mx-auto max-w-[1152px] px-4 pt-14 sm:px-5 lg:px-4">
+          <div className="mb-5 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-[#1d271f]">
+              আজ দাম কমেছে
+            </h2>
+
+            <span className="text-lg font-bold text-[#d03739]">
+              ▼
+            </span>
+          </div>
+
+          {loading ? (
+            <ProductSkeletonGrid />
+          ) : priceFallers.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {priceFallers.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-[#667069]">
+              আজ দাম কমেছে এমন কোনো পণ্য নেই।
+            </p>
+          )}
+        </section>
+
+        {/* ALL PRODUCTS */}
+        <section
+          id="সব-পণ্য"
+          className="mx-auto max-w-[1152px] scroll-mt-6 px-4 pt-14 sm:px-5 lg:px-4"
+        >
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-[#1d271f]">
+              সব পণ্য
+            </h2>
+
+            {!loading && !error && (
+              <p className="mt-1 text-sm text-[#667069]">
+                মোট{" "}
+                {toBanglaNumber(
+                  products.length
+                )}
+                টি পণ্য দেখানো হচ্ছে
+              </p>
+            )}
+          </div>
+
+          {loading && (
+            <ProductSkeletonGrid count={9} />
+          )}
+
+          {!loading && error && (
+            <div className="rounded-2xl border border-[#f0d2d2] bg-[#fff7f7] px-5 py-10 text-center">
+              <p className="font-medium text-[#d03739]">
+                {error}
+              </p>
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            products.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                  />
+                ))}
+              </div>
+            )}
+
+          {!loading &&
+            !error &&
+            products.length === 0 && (
+              <div className="py-12 text-center text-[#667069]">
+                কোনো পণ্য পাওয়া যায়নি।
+              </div>
+            )}
+        </section>
       </main>
-    </div>
+
+      <Footer />
+    </>
   );
 }
+
+function ProductSkeletonGrid({
+  count = 6,
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({
+        length: count,
+      }).map((_, index) => (
+        <ProductSkeleton key={index} />
+      ))}
+    </div>
+  );
+} 
