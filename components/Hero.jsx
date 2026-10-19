@@ -9,8 +9,8 @@ export default function Hero() {
         {/* LEFT CONTENT */}
         <div className="max-w-[576px]">
           {/* DATE BADGE */}
-          <div className="inline-flex rounded-lg bg-[#05893e]/10 px-3 py-1">
-            <p className="text-sm font-medium text-[#05893e]">
+          <div className="inline-flex rounded-lg bg-[#05893e]/10 px-4 py-1.5">
+            <p className="text-[15px] font-bold tracking-[0.01em] text-[#05893e]">
               {getBanglaDate()}
             </p>
           </div>
