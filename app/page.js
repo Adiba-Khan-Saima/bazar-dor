@@ -82,7 +82,7 @@ export default function Home() {
       )
       .sort(
         (a, b) =>
-          getChange(a) - getChange(b)
+          getChange(b) - getChange(a)
       )
       .slice(0, 6);
   }, [products]);
@@ -227,4 +227,4 @@ function ProductSkeletonGrid({
       ))}
     </div>
   );
-} 
+}

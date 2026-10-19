@@ -23,6 +23,19 @@ export default function ProductCard({ product }) {
   const unit =
     product.unit || "";
 
+  const displayUnit =
+    unit === "kg"
+      ? "প্রতি কেজি"
+      : unit === "litre" ||
+          unit === "liter"
+        ? "প্রতি লিটার"
+        : unit === "dozen"
+          ? "প্রতি ডজন"
+          : unit === "piece" ||
+              unit === "pcs"
+            ? "প্রতি পিস"
+            : unit;
+
   const changeDirection =
     product.change?.dir || "flat";
 
@@ -76,7 +89,7 @@ export default function ProductCard({ product }) {
         </h3>
 
         <p className="mt-1 text-sm text-[#667069]">
-          {unit}
+          {displayUnit}
         </p>
 
         <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
