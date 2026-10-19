@@ -5,7 +5,7 @@ import { getBanglaDate } from "@/lib/helpers";
 export default function Hero() {
   return (
     <section className="mx-auto max-w-[1152px] px-4 pt-10 sm:px-5 lg:px-4">
-      <div className="grid items-center gap-8 lg:grid-cols-[1fr_315px] lg:gap-12">
+      <div className="grid items-center gap-8 md:grid-cols-[1fr_315px] md:gap-10 lg:gap-12">
         {/* LEFT CONTENT */}
         <div className="max-w-[576px]">
           {/* DATE BADGE */}
@@ -37,14 +37,14 @@ export default function Hero() {
         </div>
 
         {/* HERO IMAGE */}
-        <div className="flex justify-center lg:justify-end">
+        <div className="flex justify-center md:justify-end">
           <Image
             src="/assets/bazar-hero.png"
             alt="বাজার দর"
             width={315}
             height={263}
             priority
-            className="h-auto w-full max-w-[315px] object-contain"
+            className="h-auto w-full max-w-[280px] object-contain md:max-w-[300px] lg:max-w-[315px]"
           />
         </div>
       </div>
